@@ -2,7 +2,7 @@
     "name": "Thaudio.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:a596b212a2eb28a4e94a6c7ef85e1b0b"
+        "GUID:cd54b18cab301f842be9a1675ffb9443"
     ],
     "includePlatforms": [
         "Editor"
