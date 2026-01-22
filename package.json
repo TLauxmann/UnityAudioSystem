@@ -1,7 +1,7 @@
 {
-  "name": "com.gameandcode.thaudio",
-  "version": "0.9.0",
-  "displayName": "Thaudio",
+  "name": "com.gameandcode.gaudio",
+  "version": "0.9.1",
+  "displayName": "Gaudio",
   "unity": "2021.3",
   "description": "Audio system with easy editor handling",
   "author": {

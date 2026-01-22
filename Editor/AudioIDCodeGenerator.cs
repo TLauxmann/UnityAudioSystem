@@ -4,12 +4,12 @@ using System.IO;
 using System.Text;
 using System.Linq;
 
-namespace Thaudio.Editor
+namespace Gaudio.Editor
 {
     public static class AudioIDCodeGenerator
     {
         private const string DefaultOutputPath = "Assets/Audio/Generated";
-        private const string DefaultNamespace = "Thaudio.Generated";
+        private const string DefaultNamespace = "Gaudio.IDs";
 
         public static void GenerateAllCategories()
         {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using Thaudio.Editor;
+using Gaudio.Editor;
 
 public class AudioSettingsWindow : EditorWindow
 {
@@ -12,7 +12,7 @@ public class AudioSettingsWindow : EditorWindow
     private Audio selectedAudio;
     private int selectedIndex = -1;
 
-    [MenuItem("Tools/Thaudio/Audio Settings", priority = 101)]
+    [MenuItem("Tools/Gaudio/Audio Settings", priority = 101)]
     public static void ShowWindow()
     {
         ShowWindow(null);

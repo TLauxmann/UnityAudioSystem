@@ -1,12 +1,8 @@
 {
-    "name": "Thaudio.Editor",
+    "name": "Gaudio",
     "rootNamespace": "",
-    "references": [
-        "GUID:cd54b18cab301f842be9a1675ffb9443"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "references": [],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

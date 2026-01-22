@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Thaudio.Editor
+namespace Gaudio.Editor
 {
     [CustomEditor(typeof(AudioIDCategory))]
     public class AudioIDCategoryEditor : UnityEditor.Editor
@@ -34,7 +34,7 @@ namespace Thaudio.Editor
             {
                 EditorGUILayout.HelpBox(
                     "No IDs defined yet.\n\n" +
-                    "Use Tools ? Thaudio ? Show Audio IDs to manage IDs with a better UI!",
+                    "Use Tools ? Gaudio ? Show Audio IDs to manage IDs with a better UI!",
                     MessageType.Info);
             }
             else

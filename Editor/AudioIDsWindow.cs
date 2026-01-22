@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Thaudio.Editor
+namespace Gaudio.Editor
 {
     public class AudioIDsWindow : EditorWindow
     {
@@ -12,7 +12,7 @@ namespace Thaudio.Editor
         private Dictionary<AudioIDCategory, bool> categoryFoldouts = new Dictionary<AudioIDCategory, bool>();
         private AudioIDCategory[] allCategories;
 
-        [MenuItem("Tools/Thaudio/Show Audio IDs", priority = 100)]
+        [MenuItem("Tools/Gaudio/Show Audio IDs", priority = 100)]
         public static void ShowWindow()
         {
             var window = GetWindow<AudioIDsWindow>("Audio IDs");
@@ -100,7 +100,7 @@ namespace Thaudio.Editor
             EditorGUILayout.HelpBox(
                 "No Audio ID Categories found!\n\n" +
                 "Create one via:\n" +
-                "Right-click in Project ? Create ? Thaudio ? Audio ID Category",
+                "Right-click in Project ? Create ? Gaudio ? Audio ID Category",
                 MessageType.Info);
 
             GUILayout.Space(10);

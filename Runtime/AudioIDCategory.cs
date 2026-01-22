@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Thaudio
+namespace Gaudio
 {
-    [CreateAssetMenu(fileName = "New Audio ID Category", menuName = "Thaudio/Audio ID Category", order = 1)]
+    [CreateAssetMenu(fileName = "New Audio ID Category", menuName = "Gaudio/Audio ID Category", order = 1)]
     public class AudioIDCategory : ScriptableObject
     {
         [SerializeField] private string categoryName;

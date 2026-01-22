@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Thaudio
+namespace Gaudio
 {
     [Serializable]
     public class AudioIDEntry
