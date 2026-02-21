@@ -8,6 +8,7 @@ public class AudioSettingsWindow : EditorWindow
     private AudioLibrary targetLibrary;
     private Vector2 scrollPosition;
     private Vector2 clipsScrollPosition;
+    private Vector2 detailsScrollPosition;
     private string searchText = "";
     private Audio selectedAudio;
     private int selectedIndex = -1;
@@ -163,7 +164,9 @@ public class AudioSettingsWindow : EditorWindow
         EditorGUILayout.LabelField("ID", EditorStyles.miniBoldLabel);
         selectedAudio.id = EditorGUILayout.TextField(selectedAudio.id);
         EditorGUILayout.Space();
-
+        
+        detailsScrollPosition = EditorGUILayout.BeginScrollView(detailsScrollPosition);
+        
         // Clips List
         EditorGUILayout.LabelField($"Audio Clips ({selectedAudio.clips.Count})", EditorStyles.miniBoldLabel);
 
@@ -259,6 +262,8 @@ public class AudioSettingsWindow : EditorWindow
         // Loop
         selectedAudio.loop = EditorGUILayout.Toggle("Loop", selectedAudio.loop);
         EditorGUILayout.Space();
+        
+        EditorGUILayout.EndScrollView();
 
         // Preview (only Random and All modes)
         if (selectedAudio.clips.Count > 0 && selectedAudio.clips.Exists(c => c != null))
