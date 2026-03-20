@@ -157,6 +157,12 @@ public class AudioManager : MonoBehaviour
         audio?.Play();
     }
 
+    public void StopSfx(string id)
+    {
+        var audio = sfxLibrary.GetAudioById(id);
+        audio?.Stop();
+    }
+
     public void PlayMusic(string id)
     {
         musicLibrary.GetAudioById(id)?.Play();
