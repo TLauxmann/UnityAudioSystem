@@ -38,9 +38,13 @@ public class Audio
         audioSourceProvider = provider;
     }
 
-    public void Play()
+    public void Play(bool reuseSource = false)
     {
-        audioSource = audioSourceProvider.Invoke();
+        if (!reuseSource || audioSource == null)
+        {
+            audioSource = audioSourceProvider.Invoke();
+        }
+
         if (singleClipMode)
         {
             PlayClipOnSource(clips[0]);

@@ -138,23 +138,23 @@ public class AudioManager : MonoBehaviour
         return CreatePooledAudioSource(audioMixerGroup);
     }
 
-    public void PlaySfx(string id, float delay = 0f)
+    public void PlaySfx(string id, float delay = 0f, bool reuseSource = false)
     {
         var audio = sfxLibrary.GetAudioById(id);
 
         if (delay <= 0f)
         {
-            audio?.Play();
+            audio?.Play(reuseSource);
             return;
         }
 
-        StartCoroutine(PlaySfxWithDelayC(audio, delay));
+        StartCoroutine(PlaySfxWithDelayC(audio, delay, reuseSource));
     }
 
-    private IEnumerator PlaySfxWithDelayC(Audio audio, float delay)
+    private IEnumerator PlaySfxWithDelayC(Audio audio, float delay, bool reuseSource)
     {
         yield return new WaitForSeconds(delay);
-        audio?.Play();
+        audio?.Play(reuseSource);
     }
 
     public void StopSfx(string id)
@@ -163,9 +163,9 @@ public class AudioManager : MonoBehaviour
         audio?.Stop();
     }
 
-    public void PlayMusic(string id)
+    public void PlayMusic(string id, bool reuseSource = false)
     {
-        musicLibrary.GetAudioById(id)?.Play();
+        musicLibrary.GetAudioById(id)?.Play(reuseSource);
     }
 
     public void FadeIn(AudioSource audioSource, float time, float toVolume = 1f, bool replay = true)
