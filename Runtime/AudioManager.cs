@@ -1,7 +1,8 @@
-using UnityEngine.Audio;
-using UnityEngine;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using System.Data.Common;
+using UnityEngine;
+using UnityEngine.Audio;
 
 public class AudioManager : MonoBehaviour
 {
@@ -146,6 +147,7 @@ public class AudioManager : MonoBehaviour
     #region Sfx
     public void PlaySfx(string id, float delay = 0f, bool reuseSource = false)
     {
+        sfxMixerGroup.audioMixer.SetFloat(sfxVolExposed, PlayerPrefs.GetFloat(sfxVolExposed, 0));
         var audio = sfxLibrary.GetAudioById(id);
 
         if (delay <= 0f)
@@ -167,11 +169,10 @@ public class AudioManager : MonoBehaviour
     public void MuteSFXGlobal() { sfxMixerGroup.audioMixer.SetFloat(sfxVolExposed, minVolume); }
     public void UnmuteSFXGlobal() { sfxMixerGroup.audioMixer.SetFloat(sfxVolExposed, PlayerPrefs.GetFloat(sfxVolExposed, 0)); }
 
-    public void FadeInSFX(string id, float time, float volume = -1, bool restartAudio = true)
+    public void FadeInSFX(string id, float time, float volume = 1, bool restartAudio = true)
     {
         var audio = sfxLibrary.GetAudioById(id);
         if (audio == null) return;
-        volume = volume == -1 ? PlayerPrefs.GetFloat(sfxVolExposed, 0) : volume;
         FadeIn(audio.GetAudioSource(), time, volume, restartAudio);
     }
 
@@ -201,17 +202,20 @@ public class AudioManager : MonoBehaviour
     #endregion
 
     #region Music
-    public void PlayMusic(string id, bool reuseSource = true) { musicLibrary.GetAudioById(id)?.Play(reuseSource); }
+    public void PlayMusic(string id, bool reuseSource = true)
+    {
+        musicMixerGroup.audioMixer.SetFloat(musicVolExposed, PlayerPrefs.GetFloat(musicVolExposed, 0));
+        musicLibrary.GetAudioById(id)?.Play(reuseSource);
+    }
     public void StopMusic(string id) { musicLibrary.GetAudioById(id)?.Stop(); }
     public void MuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, minVolume); }
     public void UnmuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, PlayerPrefs.GetFloat(musicVolExposed, 0)); }
 
     //Unlike SFX, music uses only one audio source per default
-    public void FadeInMusic(string id, float time, float volume = -1, bool restartAudio = true)
+    public void FadeInMusic(string id, float time, float volume = 1, bool restartAudio = true)
     {
         var audio = musicLibrary.GetAudioById(id);
         if (audio == null) return;
-        volume = volume == -1 ? PlayerPrefs.GetFloat(musicVolExposed, 0) : volume;
         FadeIn(audio.GetAudioSource(true), time, volume, restartAudio);
     }
 
