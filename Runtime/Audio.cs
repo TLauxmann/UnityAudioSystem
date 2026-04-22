@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -10,6 +9,7 @@ public class Audio
     public string id;
 
     public List<AudioClip> clips = new List<AudioClip>();
+    public AudioSource audioSource { get; private set; }
 
     [Range(0f, 1f)]
     public float volume = .75f;
@@ -27,7 +27,6 @@ public class Audio
     public bool playSequential = false;
     public bool playAll = false;
 
-    private AudioSource audioSource;
     private List<AudioSource> additionalSources = new List<AudioSource>();
     private Func<AudioSource> audioSourceProvider;
     private int currentClipIndex = 0;
@@ -124,6 +123,9 @@ public class Audio
     public void ResetSequentialIndex()
     {
         currentClipIndex = 0;
+    }
+
+    public void FadeIn(AudioSource audioSource, float time, float toVolume = 1f, bool replay = true) { 
     }
 
 }

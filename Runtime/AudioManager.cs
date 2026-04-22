@@ -5,6 +5,8 @@ using System.Collections;
 
 public class AudioManager : MonoBehaviour
 {
+
+    #region Variables
     private static AudioManager _instance;
     public static AudioManager Instance
     {
@@ -26,20 +28,24 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioMixerGroup sfxMixerGroup;
     [SerializeField] private AudioLibrary musicLibrary;
 
+    // Can be used to play quick OneShots
     [HideInInspector]
     public AudioSource musicAudioSource;
     [HideInInspector]
     public AudioSource sfxAudioSource;
 
     private float minVolume = -80f;
-    private Coroutine sfxFadeCoroutine;
-    private Coroutine musicFadeCoroutine;
+    private Coroutine sfxAudioGroupFadeCoroutine;
+    private Coroutine musicAudioGroupFadeCoroutine;
+
+    private Dictionary<AudioSource, Coroutine> fadeCoroutines = new Dictionary<AudioSource, Coroutine>();
 
     // Audio Source Pooling
     private Dictionary<AudioMixerGroup, List<AudioSource>> audioSourcePools = new Dictionary<AudioMixerGroup, List<AudioSource>>();
     private Dictionary<AudioMixerGroup, List<Audio>> mixerGroupSounds = new Dictionary<AudioMixerGroup, List<Audio>>();
+    #endregion
 
-
+    #region Setup and utils
     protected void Awake()
     {
         if (_instance != null && _instance != this)
@@ -67,16 +73,19 @@ public class AudioManager : MonoBehaviour
         LoadPlayerPrefs();
     }
 
-    public void IncreaseVolume(float volume)
+    public void MuteAll() { _audioMixer.SetFloat(masterVolExposed, minVolume);}
+    public void UnmuteAll() { _audioMixer.SetFloat(masterVolExposed, PlayerPrefs.GetFloat(masterVolExposed, 0)); }
+
+    public void IncreaseVolume(string exposedVol, float volume)
     {
-        _audioMixer.GetFloat(masterVolExposed, out float currentVolume);
-        _audioMixer.SetFloat(masterVolExposed, currentVolume + volume);
+        _audioMixer.GetFloat(exposedVol, out float currentVolume);
+        _audioMixer.SetFloat(exposedVol, currentVolume + volume);
     }
 
-    public void DecreaseVolume(float volume)
+    public void DecreaseVolume(string exposedVol, float volume)
     {
-        _audioMixer.GetFloat(masterVolExposed, out float currentVolume);
-        _audioMixer.SetFloat(masterVolExposed, currentVolume - volume);
+        _audioMixer.GetFloat(exposedVol, out float currentVolume);
+        _audioMixer.SetFloat(exposedVol, currentVolume - volume);
     }
 
     private void LoadPlayerPrefs()
@@ -138,6 +147,9 @@ public class AudioManager : MonoBehaviour
         return CreatePooledAudioSource(audioMixerGroup);
     }
 
+    #endregion
+
+    #region Sfx
     public void PlaySfx(string id, float delay = 0f, bool reuseSource = false)
     {
         var audio = sfxLibrary.GetAudioById(id);
@@ -157,31 +169,89 @@ public class AudioManager : MonoBehaviour
         audio?.Play(reuseSource);
     }
 
-    public void StopSfx(string id)
+    public void StopSfx(string id) { sfxLibrary.GetAudioById(id)?.Stop(); }
+    public void MuteSFXGlobal() { sfxMixerGroup.audioMixer.SetFloat(sfxVolExposed, minVolume); }
+    public void UnmuteSFXGlobal() { sfxMixerGroup.audioMixer.SetFloat(sfxVolExposed, PlayerPrefs.GetFloat(sfxVolExposed, 0)); }
+
+    public void FadeInSFX(string id, float time, float volume = -1, bool restartAudio = true)
     {
         var audio = sfxLibrary.GetAudioById(id);
-        audio?.Stop();
+        if (audio == null) return;
+        volume = volume == -1 ? PlayerPrefs.GetFloat(sfxVolExposed, 0) : volume;
+        FadeIn(audio.audioSource, time, volume, restartAudio);
     }
 
-    public void PlayMusic(string id, bool reuseSource = false)
+    public void FadeOutSFX(string id, float time, float toVolume = 0f, bool stopAfterFadeOut = true)
     {
-        musicLibrary.GetAudioById(id)?.Play(reuseSource);
+        var audio = sfxLibrary.GetAudioById(id);
+        if (audio == null) return;
+        FadeOut(audio.audioSource, time, toVolume, stopAfterFadeOut);
     }
 
-    public void FadeIn(AudioSource audioSource, float time, float toVolume = 1f, bool replay = true)
+    public void FadeInSFXAudioGroup(float time)
     {
-        StartCoroutine(FadeInC(audioSource, time, toVolume, replay));
+        float toVolume = PlayerPrefs.GetFloat(sfxVolExposed, 0);
+        FadeInExposedVolume(time, toVolume, sfxVolExposed, sfxAudioGroupFadeCoroutine);
+    }
+
+    public void FadeOutSFXAudioGroup(float time)
+    {
+        FadeOutExposedVolume(time, sfxVolExposed, sfxAudioGroupFadeCoroutine);
     }
 
 
-    public void FadeOut(AudioSource audioSource, float time, float toVolume = 0f, bool replay = true)
+    #endregion
+
+    #region Music
+    public void PlayMusic(string id, bool reuseSource = false) { musicLibrary.GetAudioById(id)?.Play(reuseSource); }
+    public void StopMusic(string id) { musicLibrary.GetAudioById(id)?.Stop(); }
+    public void MuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, minVolume); }
+    public void UnmuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, PlayerPrefs.GetFloat(musicVolExposed, 0)); }
+
+    public void FadeInMusic(string id, float time, float volume = -1, bool restartAudio = true)
     {
-        StartCoroutine(FadeOutC(audioSource, time, toVolume, replay));
+        var audio = musicLibrary.GetAudioById(id);
+        if (audio == null) return;
+        volume = volume == -1 ? PlayerPrefs.GetFloat(musicVolExposed, 0) : volume;
+        FadeIn(audio.audioSource, time, volume, restartAudio);
     }
 
-    private IEnumerator FadeInC(AudioSource audioSource, float duration, float targetVolume, bool replay)
+    public void FadeOutMusic(string id, float time, float toVolume = 0f, bool stopAfterFadeOut = true)
     {
-        if (replay) audioSource.Play();
+        var audio = musicLibrary.GetAudioById(id);
+        if (audio == null) return;
+        FadeOut(audio.audioSource, time, toVolume, stopAfterFadeOut);
+    }
+
+    public void FadeInMusicAudioGroup(float time)
+    {
+        float toVolume = PlayerPrefs.GetFloat(musicVolExposed, 0);
+        FadeInExposedVolume(time, toVolume, musicVolExposed, musicAudioGroupFadeCoroutine);
+    }
+    public void FadeOutMusicMusicGroup(float time)
+    {
+        FadeOutExposedVolume(time, musicVolExposed, musicAudioGroupFadeCoroutine);
+    }
+    #endregion
+
+    #region Fade In/Out
+    public void FadeIn(AudioSource audioSource, float time, float toVolume = 1f, bool restartAudio = true)
+    {
+        StopRunningFade(audioSource);
+        Coroutine courotine = StartCoroutine(FadeInC(audioSource, time, toVolume, restartAudio));
+        fadeCoroutines.Add(audioSource, courotine);
+    }
+
+    public void FadeOut(AudioSource audioSource, float time, float toVolume = 0f, bool stopAfterFadeOut = true)
+    {
+        StopRunningFade(audioSource);
+        Coroutine courotine = StartCoroutine(FadeOutC(audioSource, time, toVolume, stopAfterFadeOut));
+        fadeCoroutines.Add(audioSource, courotine);
+    }
+
+    private IEnumerator FadeInC(AudioSource audioSource, float duration, float targetVolume, bool restartAudio)
+    {
+        if (restartAudio) audioSource.Play();
 
         float startVolume = audioSource.volume;
         float elapsed = 0f;
@@ -194,9 +264,10 @@ public class AudioManager : MonoBehaviour
         }
 
         audioSource.volume = targetVolume;
+        fadeCoroutines.Remove(audioSource);
     }
 
-    private IEnumerator FadeOutC(AudioSource audioSource, float duration, float targetVolume, bool stop)
+    private IEnumerator FadeOutC(AudioSource audioSource, float duration, float targetVolume, bool stopAfterFadeOut)
     {
         float startVolume = audioSource.volume;
         float elapsed = 0f;
@@ -209,7 +280,21 @@ public class AudioManager : MonoBehaviour
         }
 
         audioSource.volume = targetVolume;
-        if (stop) audioSource.Stop();
+        if (stopAfterFadeOut) audioSource.Stop();
+        fadeCoroutines.Remove(audioSource);
+    }
+
+    private void StopRunningFade(AudioSource audioSource)
+    {
+        //Check if there's already a fade coroutine running for this audio source and stop it
+        if (fadeCoroutines.TryGetValue(audioSource, out Coroutine existingCoroutine))
+        {
+            if (existingCoroutine != null)
+            {
+                StopCoroutine(existingCoroutine);
+                fadeCoroutines.Remove(audioSource);
+            }
+        }
     }
 
     private void FadeInExposedVolume(float time, float toVolume, string exposedParam, Coroutine coroutine)
@@ -222,27 +307,6 @@ public class AudioManager : MonoBehaviour
     {
         if (coroutine != null) StopCoroutine(coroutine);
         coroutine = StartCoroutine(FadeOutMixerGroup(exposedParam, time));
-    }
-
-    public void FadeInSFX(float time)
-    {
-        float toVolume = PlayerPrefs.GetFloat(sfxVolExposed, 0);
-        FadeInExposedVolume(time, toVolume, sfxVolExposed, sfxFadeCoroutine);
-    }
-
-    public void FadeOutSFX(float time)
-    {
-        FadeOutExposedVolume(time, sfxVolExposed, sfxFadeCoroutine);
-    }
-
-    public void FadeInMusic(float time)
-    {
-        float toVolume = PlayerPrefs.GetFloat(musicVolExposed, 0);
-        FadeInExposedVolume(time, toVolume, musicVolExposed, musicFadeCoroutine);
-    }
-    public void FadeOutMusic(float time)
-    {
-        FadeOutExposedVolume(time, musicVolExposed, musicFadeCoroutine);
     }
 
     private IEnumerator FadeOutMixerGroup(string exposedName, float time)
@@ -268,5 +332,6 @@ public class AudioManager : MonoBehaviour
             yield return null;
         }
     }
+    #endregion
 }
 
