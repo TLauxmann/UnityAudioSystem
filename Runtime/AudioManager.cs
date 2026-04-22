@@ -73,7 +73,7 @@ public class AudioManager : MonoBehaviour
         LoadPlayerPrefs();
     }
 
-    public void MuteAll() { _audioMixer.SetFloat(masterVolExposed, minVolume);}
+    public void MuteAll() { _audioMixer.SetFloat(masterVolExposed, minVolume); }
     public void UnmuteAll() { _audioMixer.SetFloat(masterVolExposed, PlayerPrefs.GetFloat(masterVolExposed, 0)); }
 
     public void IncreaseVolume(string exposedVol, float volume)
@@ -94,15 +94,9 @@ public class AudioManager : MonoBehaviour
         float masterVol = PlayerPrefs.GetFloat(masterVolExposed, -100);
         float musicVol = PlayerPrefs.GetFloat(musicVolExposed, -100);
         float sfxVol = PlayerPrefs.GetFloat(sfxVolExposed, -100);
-        if (masterVol >= -80) musicMixerGroup.audioMixer.SetFloat(masterVolExposed, masterVol);
-        if (musicVol >= -80)
-        {
-            musicMixerGroup.audioMixer.SetFloat(musicVolExposed, musicVol);
-        }
-        if (sfxVol >= -80)
-        {
-            musicMixerGroup.audioMixer.SetFloat(sfxVolExposed, sfxVol);
-        }
+        if (masterVol >= -80) _audioMixer.SetFloat(masterVolExposed, masterVol);
+        if (musicVol >= -80) { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, musicVol); }
+        if (sfxVol >= -80) { sfxMixerGroup.audioMixer.SetFloat(sfxVolExposed, sfxVol); }
     }
 
     private void AddSoundToMixerGroup(AudioMixerGroup audioMixerGroup, List<Audio> sounds)
