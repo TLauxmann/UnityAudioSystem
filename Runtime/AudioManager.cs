@@ -202,6 +202,15 @@ public class AudioManager : MonoBehaviour
     #endregion
 
     #region Music
+
+    public void SetStartingPoint(string id, float time)
+    {
+        var audio = musicLibrary.GetAudioById(id);
+        if (audio == null) return;
+        AudioSource source = audio.GetAudioSource(true);
+        source.time = time;
+    }
+
     public void PlayMusic(string id, bool reuseSource = true)
     {
         musicMixerGroup.audioMixer.SetFloat(musicVolExposed, PlayerPrefs.GetFloat(musicVolExposed, 0));

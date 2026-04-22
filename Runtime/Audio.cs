@@ -65,11 +65,8 @@ public class Audio
         {
             audioSource = audioSourceProvider.Invoke();
         }
+        audioSource.clip = clips[0];
 
-        if (audioSource.clip == null)
-        {
-            audioSource.clip = clips[0];
-        }
         return audioSource;
     }
 
