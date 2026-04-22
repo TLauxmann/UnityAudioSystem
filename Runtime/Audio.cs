@@ -9,7 +9,7 @@ public class Audio
     public string id;
 
     public List<AudioClip> clips = new List<AudioClip>();
-    public AudioSource audioSource { get; private set; }
+    private AudioSource audioSource;
 
     [Range(0f, 1f)]
     public float volume = .75f;
@@ -39,10 +39,7 @@ public class Audio
 
     public void Play(bool reuseSource = false)
     {
-        if (!reuseSource || audioSource == null)
-        {
-            audioSource = audioSourceProvider.Invoke();
-        }
+        audioSource = GetAudioSource(reuseSource);
 
         if (singleClipMode)
         {
@@ -60,6 +57,15 @@ public class Audio
         {
             PlayRandom();
         }
+    }
+
+    public AudioSource GetAudioSource(bool reuseSource = false)
+    {
+        if (!reuseSource || audioSource == null)
+        {
+            audioSource = audioSourceProvider.Invoke();
+        }
+        return audioSource;
     }
 
     private void PlayRandom()
@@ -125,7 +131,8 @@ public class Audio
         currentClipIndex = 0;
     }
 
-    public void FadeIn(AudioSource audioSource, float time, float toVolume = 1f, bool replay = true) { 
+    public void FadeIn(AudioSource audioSource, float time, float toVolume = 1f, bool replay = true)
+    {
     }
 
 }

@@ -178,14 +178,18 @@ public class AudioManager : MonoBehaviour
         var audio = sfxLibrary.GetAudioById(id);
         if (audio == null) return;
         volume = volume == -1 ? PlayerPrefs.GetFloat(sfxVolExposed, 0) : volume;
-        FadeIn(audio.audioSource, time, volume, restartAudio);
+        FadeIn(audio.GetAudioSource(), time, volume, restartAudio);
     }
 
+    /// <summary>
+    /// Be carful with playing multiple SFX and fading them out, 
+    /// because currently only the last audioSource of the given ID will be faded out
+    /// </summary>
     public void FadeOutSFX(string id, float time, float toVolume = 0f, bool stopAfterFadeOut = true)
     {
         var audio = sfxLibrary.GetAudioById(id);
         if (audio == null) return;
-        FadeOut(audio.audioSource, time, toVolume, stopAfterFadeOut);
+        FadeOut(audio.GetAudioSource(true), time, toVolume, stopAfterFadeOut);
     }
 
     public void FadeInSFXAudioGroup(float time)
@@ -208,19 +212,20 @@ public class AudioManager : MonoBehaviour
     public void MuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, minVolume); }
     public void UnmuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, PlayerPrefs.GetFloat(musicVolExposed, 0)); }
 
+    //Unlike SFX, music uses only one audio source per default
     public void FadeInMusic(string id, float time, float volume = -1, bool restartAudio = true)
     {
         var audio = musicLibrary.GetAudioById(id);
         if (audio == null) return;
         volume = volume == -1 ? PlayerPrefs.GetFloat(musicVolExposed, 0) : volume;
-        FadeIn(audio.audioSource, time, volume, restartAudio);
+        FadeIn(audio.GetAudioSource(true), time, volume, restartAudio);
     }
 
     public void FadeOutMusic(string id, float time, float toVolume = 0f, bool stopAfterFadeOut = true)
     {
         var audio = musicLibrary.GetAudioById(id);
         if (audio == null) return;
-        FadeOut(audio.audioSource, time, toVolume, stopAfterFadeOut);
+        FadeOut(audio.GetAudioSource(true), time, toVolume, stopAfterFadeOut);
     }
 
     public void FadeInMusicAudioGroup(float time)
