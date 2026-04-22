@@ -223,7 +223,10 @@ public class AudioManager : MonoBehaviour
     {
         var audio = musicLibrary.GetAudioById(id);
         if (audio == null) return;
-        FadeOut(audio.GetAudioSource(true), time, toVolume, stopAfterFadeOut);
+        AudioSource source = audio.GetAudioSource(true);
+        if (!source.isPlaying) return;
+
+        FadeOut(source, time, toVolume, stopAfterFadeOut);
     }
 
     public void FadeInMusicAudioGroup(float time)
@@ -254,7 +257,11 @@ public class AudioManager : MonoBehaviour
 
     private IEnumerator FadeInC(AudioSource audioSource, float duration, float targetVolume, bool restartAudio)
     {
-        if (restartAudio) audioSource.Play();
+        if (restartAudio)
+        {
+            audioSource.volume = 0f;
+            audioSource.Play();
+        }
 
         float startVolume = audioSource.volume;
         float elapsed = 0f;
@@ -322,6 +329,7 @@ public class AudioManager : MonoBehaviour
             _audioMixer.SetFloat(exposedName, Mathf.Lerp(currentVol, minVolume, elapsedTime / time));
             yield return null;
         }
+
     }
 
     private IEnumerator FadeInMixerGroup(string exposedName, float time, float toVolume)
@@ -334,6 +342,7 @@ public class AudioManager : MonoBehaviour
             _audioMixer.SetFloat(exposedName, Mathf.Lerp(currentVol, toVolume, elapsedTime / time));
             yield return null;
         }
+
     }
     #endregion
 }

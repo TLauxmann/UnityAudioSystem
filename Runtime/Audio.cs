@@ -65,6 +65,11 @@ public class Audio
         {
             audioSource = audioSourceProvider.Invoke();
         }
+
+        if (audioSource.clip == null)
+        {
+            audioSource.clip = clips[0];
+        }
         return audioSource;
     }
 
@@ -129,10 +134,6 @@ public class Audio
     public void ResetSequentialIndex()
     {
         currentClipIndex = 0;
-    }
-
-    public void FadeIn(AudioSource audioSource, float time, float toVolume = 1f, bool replay = true)
-    {
     }
 
 }
