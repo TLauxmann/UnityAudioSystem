@@ -203,7 +203,7 @@ public class AudioManager : MonoBehaviour
     #endregion
 
     #region Music
-    public void PlayMusic(string id, bool reuseSource = false) { musicLibrary.GetAudioById(id)?.Play(reuseSource); }
+    public void PlayMusic(string id, bool reuseSource = true) { musicLibrary.GetAudioById(id)?.Play(reuseSource); }
     public void StopMusic(string id) { musicLibrary.GetAudioById(id)?.Stop(); }
     public void MuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, minVolume); }
     public void UnmuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, PlayerPrefs.GetFloat(musicVolExposed, 0)); }
