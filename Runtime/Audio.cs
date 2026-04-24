@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -9,7 +10,10 @@ public class Audio
     public string id;
 
     public List<AudioClip> clips = new List<AudioClip>();
-    private AudioSource audioSource;
+
+    public bool reuseSource = false;
+    public int bpm;
+    public int beatsPerBar = 4;
 
     [Range(0f, 1f)]
     public float volume = .75f;
@@ -31,16 +35,32 @@ public class Audio
     private Func<AudioSource> audioSourceProvider;
     private int currentClipIndex = 0;
     private bool singleClipMode = false;
+    private float startingPos = 0f;
+    private Coroutine activeFadeCoroutine;
+
+    private AudioSource activeAudioSource;
+
+    private AudioSource audioSource
+    {
+        get
+        {
+            if (!reuseSource || activeAudioSource == null)
+            {
+                activeAudioSource = audioSourceProvider.Invoke();
+                activeAudioSource.clip = clips[0];
+            }
+            SetAudioSettings(activeAudioSource);
+            return activeAudioSource;
+        }
+    }
 
     public void SetAudioSourceProvider(Func<AudioSource> provider)
     {
         audioSourceProvider = provider;
     }
 
-    public void Play(bool reuseSource = false)
+    public void Play()
     {
-        audioSource = GetAudioSource(reuseSource);
-
         if (singleClipMode)
         {
             PlayClipOnSource(clips[0]);
@@ -57,17 +77,6 @@ public class Audio
         {
             PlayRandom();
         }
-    }
-
-    public AudioSource GetAudioSource(bool reuseSource = false)
-    {
-        if (!reuseSource || audioSource == null)
-        {
-            audioSource = audioSourceProvider.Invoke();
-        }
-        audioSource.clip = clips[0];
-
-        return audioSource;
     }
 
     private void PlayRandom()
@@ -103,20 +112,26 @@ public class Audio
         PlayClipOnSource(audioSource, clip);
     }
 
-    private void PlayClipOnSource(AudioSource audioSource, AudioClip clip)
+    private void PlayClipOnSource(AudioSource aSource, AudioClip clip)
     {
-        audioSource.clip = clip;
-        audioSource.loop = loop;
-        audioSource.volume = volume + Random.Range(-volumeVariance, volumeVariance);
-        audioSource.pitch = pitch + Random.Range(-pitchVariance, pitchVariance);
-        audioSource.Play();
+        aSource.clip = clip;
+        SetAudioSettings(aSource);
+        aSource.Play();
+    }
+
+    private void SetAudioSettings(AudioSource aSource)
+    {
+        aSource.loop = loop;
+        aSource.volume = volume + Random.Range(-volumeVariance, volumeVariance);
+        aSource.pitch = pitch + Random.Range(-pitchVariance, pitchVariance);
+        aSource.time = startingPos;
     }
 
     public void Stop()
     {
-        if (audioSource != null && clips.Contains(audioSource.clip))
+        if (activeAudioSource != null && clips.Contains(audioSource.clip))
         {
-            audioSource.Stop();
+            activeAudioSource.Stop();
         }
 
         foreach (var additionalSource in additionalSources)
@@ -131,6 +146,84 @@ public class Audio
     public void ResetSequentialIndex()
     {
         currentClipIndex = 0;
+    }
+
+    public void SetAudioPos(float pos)
+    {
+        startingPos = pos;
+    }
+
+    public bool IsPlaying() { return activeAudioSource != null && activeAudioSource.isPlaying; }
+
+    public void FadeIn(MonoBehaviour runner, float time, float toVolume = 1f, bool restartAudio = true)
+    {
+        if (restartAudio)
+        {
+            Play();
+            activeAudioSource.volume = 0f;
+        }
+
+        StartFade(runner, time, toVolume, false);
+    }
+
+    public void FadeOut(MonoBehaviour runner, float time, float toVolume, bool stopAfterFadeOut = true)
+    {
+        if (activeAudioSource == null || !activeAudioSource.isPlaying) return;
+        StartFade(runner, time, toVolume, stopAfterFadeOut);
+    }
+
+    private void StartFade(MonoBehaviour runner, float duration, float targetVolume, bool stopAudioAtEnd)
+    {
+        if (activeFadeCoroutine != null) { runner.StopCoroutine(activeFadeCoroutine); }
+        activeFadeCoroutine = runner.StartCoroutine(FadeAudioCoroutine(duration, targetVolume, stopAudioAtEnd));
+    }
+
+    private IEnumerator FadeAudioCoroutine(float duration, float targetVol, bool stopAudioAtEnd)
+    {
+        if (activeAudioSource == null) yield break;
+
+        float startVol = activeAudioSource.volume;
+        float timer = 0f;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float t = timer / duration;
+
+            if (activeAudioSource == null) yield break;
+
+            activeAudioSource.volume = Mathf.Lerp(startVol, targetVol, t);
+            yield return null;
+        }
+
+        if (activeAudioSource != null)
+        {
+            activeAudioSource.volume = targetVol;
+            if (stopAudioAtEnd) { activeAudioSource.Stop(); }
+        }
+
+        activeFadeCoroutine = null;
+    }
+
+    public float GetCurrentPlaybackTime()
+    {
+        if (activeAudioSource != null && activeAudioSource.isPlaying)
+        {
+            return activeAudioSource.time;
+        }
+        return 0f;
+    }
+
+    public float GetTimeToNextBar()
+    {
+        if (bpm <= 0f) return 0f;
+
+        float currentPosition = GetCurrentPlaybackTime();
+        float beatDuration = 60f / bpm;
+        float barDuration = beatDuration * beatsPerBar;
+
+        float timeInCurrentBar = currentPosition % barDuration;
+        return barDuration - timeInCurrentBar;
     }
 
 }

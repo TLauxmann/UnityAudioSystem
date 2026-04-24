@@ -164,9 +164,22 @@ public class AudioSettingsWindow : EditorWindow
         EditorGUILayout.LabelField("ID", EditorStyles.miniBoldLabel);
         selectedAudio.id = EditorGUILayout.TextField(selectedAudio.id);
         EditorGUILayout.Space();
-        
+
+        // Reuse Source
+        EditorGUILayout.HelpBox("Reuse AudioSource for music; SFX typically use separate AudioSources for fast parallel playback; use bpm and beats per bar for music transitions.", MessageType.Info);
+        selectedAudio.reuseSource = EditorGUILayout.Toggle("Reuse Source", selectedAudio.reuseSource);
+
+        // BPM
+        EditorGUILayout.LabelField("BPM", EditorStyles.miniBoldLabel);
+        selectedAudio.bpm = EditorGUILayout.IntField(selectedAudio.bpm);
+
+        //beats per bar
+        EditorGUILayout.LabelField("Beats Per Bar", EditorStyles.miniBoldLabel);
+        selectedAudio.beatsPerBar = EditorGUILayout.IntField(selectedAudio.beatsPerBar);
+        EditorGUILayout.Space();
+
         detailsScrollPosition = EditorGUILayout.BeginScrollView(detailsScrollPosition);
-        
+
         // Clips List
         EditorGUILayout.LabelField($"Audio Clips ({selectedAudio.clips.Count})", EditorStyles.miniBoldLabel);
 
@@ -262,17 +275,17 @@ public class AudioSettingsWindow : EditorWindow
         // Loop
         selectedAudio.loop = EditorGUILayout.Toggle("Loop", selectedAudio.loop);
         EditorGUILayout.Space();
-        
+
         EditorGUILayout.EndScrollView();
 
         // Preview (only Random and All modes)
         if (selectedAudio.clips.Count > 0 && selectedAudio.clips.Exists(c => c != null))
         {
             EditorGUILayout.BeginHorizontal();
-            
+
             // Show preview based on mode, but only support Random and All in preview
             string previewMode = selectedAudio.playAll ? "Play All" : "Play Random";
-            
+
             if (GUILayout.Button($"Play Preview ({previewMode})", GUILayout.Height(30)))
             {
                 PlayPreview();
@@ -282,7 +295,7 @@ public class AudioSettingsWindow : EditorWindow
                 StopPreview();
             }
             EditorGUILayout.EndHorizontal();
-            
+
             if (selectedAudio.playSequential)
             {
                 EditorGUILayout.HelpBox("Sequential mode preview plays as Random in editor.", MessageType.Info);

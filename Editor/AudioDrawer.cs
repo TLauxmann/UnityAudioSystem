@@ -28,6 +28,25 @@ public class AudioDrawer : PropertyDrawer
                 idProp);
             yPos += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
 
+            // Reuse Source
+            SerializedProperty reuseSourceProp = property.FindPropertyRelative("reuseSource");
+            EditorGUI.PropertyField(new Rect(position.x, yPos, position.width, EditorGUIUtility.singleLineHeight),
+                reuseSourceProp);
+            yPos += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+
+            //Bpm
+            SerializedProperty bpmProp = property.FindPropertyRelative("bpm");
+            EditorGUI.PropertyField(new Rect(position.x, yPos, position.width, EditorGUIUtility.singleLineHeight),
+                bpmProp);
+            yPos += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+
+
+            // Beats Per Bar
+            SerializedProperty beatsPerBarProp = property.FindPropertyRelative("beatsPerBar");
+            EditorGUI.PropertyField(new Rect(position.x, yPos, position.width, EditorGUIUtility.singleLineHeight),
+                beatsPerBarProp);
+            yPos += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+
             // Clips Liste
             SerializedProperty clipsProp = property.FindPropertyRelative("clips");
 
@@ -87,6 +106,6 @@ public class AudioDrawer : PropertyDrawer
         SerializedProperty clipsProp = property.FindPropertyRelative("clips");
         float clipsHeight = EditorGUI.GetPropertyHeight(clipsProp);
 
-        return EditorGUIUtility.singleLineHeight * 7 + clipsHeight + EditorGUIUtility.standardVerticalSpacing * 7;
+        return EditorGUIUtility.singleLineHeight * 8 + clipsHeight + EditorGUIUtility.standardVerticalSpacing * 8;
     }
 }
