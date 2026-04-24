@@ -8,6 +8,8 @@ using Random = UnityEngine.Random;
 public class Audio
 {
     public string id;
+    public Action OnStartPlay;
+    public Action OnStopPlay;
 
     public List<AudioClip> clips = new List<AudioClip>();
 
@@ -49,7 +51,6 @@ public class Audio
                 activeAudioSource = audioSourceProvider.Invoke();
                 activeAudioSource.clip = clips[0];
             }
-            SetAudioSettings(activeAudioSource);
             return activeAudioSource;
         }
     }
@@ -117,6 +118,7 @@ public class Audio
         aSource.clip = clip;
         SetAudioSettings(aSource);
         aSource.Play();
+        OnStartPlay?.Invoke();
     }
 
     private void SetAudioSettings(AudioSource aSource)
@@ -125,13 +127,15 @@ public class Audio
         aSource.volume = volume + Random.Range(-volumeVariance, volumeVariance);
         aSource.pitch = pitch + Random.Range(-pitchVariance, pitchVariance);
         aSource.time = startingPos;
+        startingPos = 0; // reset starting position after applying it to the clip
     }
 
     public void Stop()
     {
-        if (activeAudioSource != null && clips.Contains(audioSource.clip))
+        if (activeAudioSource != null && clips.Contains(activeAudioSource.clip))
         {
             activeAudioSource.Stop();
+            OnStopPlay?.Invoke();
         }
 
         foreach (var additionalSource in additionalSources)
@@ -143,16 +147,9 @@ public class Audio
         }
     }
 
-    public void ResetSequentialIndex()
-    {
-        currentClipIndex = 0;
-    }
-
-    public void SetAudioPos(float pos)
-    {
-        startingPos = pos;
-    }
-
+    public void ResetSequentialIndex() { currentClipIndex = 0; }
+    public void SetAudioPos(float pos) { startingPos = pos; }
+    public float GetAudioPos() { return activeAudioSource != null ? activeAudioSource.time : 0f; }
     public bool IsPlaying() { return activeAudioSource != null && activeAudioSource.isPlaying; }
 
     public void FadeIn(MonoBehaviour runner, float time, float toVolume = 1f, bool restartAudio = true)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -248,6 +249,14 @@ public class AudioManager : MonoBehaviour
 
         beatMatchingtransitionCoroutine = null;
     }
+
+    public void SubscribeToMusicPlayAction(string id, Action action) { musicLibrary.GetAudioById(id).OnStartPlay += action; }
+    public void UnsubscribeFromMusicPlayAction(string id, Action action) { musicLibrary.GetAudioById(id).OnStartPlay -= action; }
+    public void SubscribeToMusicStopAction(string id, Action action) { musicLibrary.GetAudioById(id).OnStopPlay += action; }
+    public void UnsubscribeFromMusicStopAction(string id, Action action) { musicLibrary.GetAudioById(id).OnStopPlay -= action; }
+    public float GetCurrentPos(string id) { return musicLibrary.GetAudioById(id)?.GetAudioPos() ?? 0f; }
+
+
     #endregion
 
     #region MixerGroupFade
