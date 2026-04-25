@@ -1,6 +1,6 @@
 {
   "name": "com.gameandcode.gaudio",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "displayName": "Gaudio",
   "unity": "2021.3",
   "description": "Audio system with easy editor handling",

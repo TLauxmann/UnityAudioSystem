@@ -154,6 +154,7 @@ public class Audio
 
     public void FadeIn(MonoBehaviour runner, float time, float toVolume = 1f, bool restartAudio = true)
     {
+        Debug.Log($"Audio: Fading in audio {id} over {time} seconds to volume {toVolume}. Restart audio: {restartAudio}");
         if (restartAudio)
         {
             Play();
@@ -171,6 +172,7 @@ public class Audio
 
     private void StartFade(MonoBehaviour runner, float duration, float targetVolume, bool stopAudioAtEnd)
     {
+        Debug.Log($"Audio: Starting fade on audio {id} to volume {targetVolume} over {duration} seconds. Stop audio at end: {stopAudioAtEnd}");
         if (activeFadeCoroutine != null) { runner.StopCoroutine(activeFadeCoroutine); }
         activeFadeCoroutine = runner.StartCoroutine(FadeAudioCoroutine(duration, targetVolume, stopAudioAtEnd));
     }
@@ -196,7 +198,9 @@ public class Audio
         if (activeAudioSource != null)
         {
             activeAudioSource.volume = targetVol;
-            if (stopAudioAtEnd) { activeAudioSource.Stop(); }
+            if (stopAudioAtEnd) { activeAudioSource.Stop(); 
+            Debug.Log($"Audio: Fade completed on audio {id}. Audio stopped: {stopAudioAtEnd}");
+            }
         }
 
         activeFadeCoroutine = null;

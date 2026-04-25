@@ -40,11 +40,11 @@ public class AudioManager : MonoBehaviour
     private Coroutine musicAudioGroupFadeCoroutine;
     private Coroutine beatMatchingtransitionCoroutine;
 
-    private Dictionary<AudioSource, Coroutine> fadeCoroutines = new Dictionary<AudioSource, Coroutine>();
-
     // Audio Source Pooling
     private Dictionary<AudioMixerGroup, List<AudioSource>> audioSourcePools = new Dictionary<AudioMixerGroup, List<AudioSource>>();
     private Dictionary<AudioMixerGroup, List<Audio>> mixerGroupSounds = new Dictionary<AudioMixerGroup, List<Audio>>();
+    private HashSet<AudioSource> reservedSources = new HashSet<AudioSource>();
+
     #endregion
 
     #region Setup and utils
@@ -116,7 +116,7 @@ public class AudioManager : MonoBehaviour
         // Set Callback
         foreach (Audio audio in sounds)
         {
-            audio.SetAudioSourceProvider(() => GetAvailableAudioSource(audioMixerGroup));
+            audio.SetAudioSourceProvider(() => GetAvailableAudioSource(audioMixerGroup, audio));
         }
     }
 
@@ -129,18 +129,31 @@ public class AudioManager : MonoBehaviour
         return source;
     }
 
-    private AudioSource GetAvailableAudioSource(AudioMixerGroup audioMixerGroup)
+    private AudioSource GetAvailableAudioSource(AudioMixerGroup audioMixerGroup, Audio requestingAudio)
     {
         List<AudioSource> pool = audioSourcePools[audioMixerGroup];
+        AudioSource availableSource = null;
 
         foreach (AudioSource source in pool)
         {
-            if (!source.isPlaying)
+            if (!source.isPlaying && !reservedSources.Contains(source))
             {
-                return source;
+                availableSource = source;
+                break;
             }
         }
-        return CreatePooledAudioSource(audioMixerGroup);
+
+        if (availableSource == null)
+        {
+            availableSource = CreatePooledAudioSource(audioMixerGroup);
+        }
+
+        //reserve the source, so that it won't be used by another audio
+        if (requestingAudio.reuseSource)
+        {
+            reservedSources.Add(availableSource);
+        }
+        return availableSource;
     }
     public void SetStartingPoint(string id, float time)
     {
