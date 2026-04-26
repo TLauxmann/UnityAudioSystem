@@ -188,7 +188,7 @@ public class AudioManager : MonoBehaviour
     public void StopSfx(string id) { sfxLibrary.GetAudioById(id)?.Stop(); }
     public void MuteSFXGlobal() { sfxMixerGroup.audioMixer.SetFloat(sfxVolExposed, minVolume); }
     public void UnmuteSFXGlobal() { sfxMixerGroup.audioMixer.SetFloat(sfxVolExposed, PlayerPrefs.GetFloat(sfxVolExposed, 0)); }
-    public void FadeInSFX(string id, float time, float volume = 1, bool restartAudio = true)
+    public void FadeInSFX(string id, float time, float volume = -1, bool restartAudio = true)
     {
         sfxLibrary.GetAudioById(id)?.FadeIn(this, time, volume, restartAudio);
     }
@@ -211,7 +211,7 @@ public class AudioManager : MonoBehaviour
     public void MuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, minVolume); }
     public void UnmuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, PlayerPrefs.GetFloat(musicVolExposed, 0)); }
 
-    public void FadeInMusic(string id, float time, float volume = 1, bool restartAudio = true)
+    public void FadeInMusic(string id, float time, float volume = -1, bool restartAudio = true)
     {
         musicLibrary.GetAudioById(id)?.FadeIn(this, time, volume, restartAudio);
     }

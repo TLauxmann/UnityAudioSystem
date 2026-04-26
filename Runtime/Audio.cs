@@ -124,7 +124,7 @@ public class Audio
     private void SetAudioSettings(AudioSource aSource)
     {
         aSource.loop = loop;
-        aSource.volume = volume + Random.Range(-volumeVariance, volumeVariance);
+        aSource.volume = Mathf.Clamp01(volume + Random.Range(-volumeVariance, volumeVariance));
         aSource.pitch = pitch + Random.Range(-pitchVariance, pitchVariance);
         aSource.time = startingPos;
         startingPos = 0; // reset starting position after applying it to the clip
@@ -152,7 +152,7 @@ public class Audio
     public float GetAudioPos() { return activeAudioSource != null ? activeAudioSource.time : 0f; }
     public bool IsPlaying() { return activeAudioSource != null && activeAudioSource.isPlaying; }
 
-    public void FadeIn(MonoBehaviour runner, float time, float toVolume = 1f, bool restartAudio = true)
+    public void FadeIn(MonoBehaviour runner, float time, float toVolume = -1, bool restartAudio = true)
     {
         if (restartAudio)
         {
@@ -160,7 +160,7 @@ public class Audio
             activeAudioSource.volume = 0f;
         }
 
-        StartFade(runner, time, toVolume, false);
+        StartFade(runner, time, toVolume >= 0 ? toVolume : volume, false);
     }
 
     public void FadeOut(MonoBehaviour runner, float time, float toVolume, bool stopAfterFadeOut = true)
