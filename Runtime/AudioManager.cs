@@ -176,13 +176,34 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(PlaySfxWithDelayC(audio, delay));
+        StartCoroutine(PlaySfxWithDelayC(audio, delay, -1));
     }
 
-    private IEnumerator PlaySfxWithDelayC(Audio audio, float delay)
+    public void PlaySfxAtIndex(string id, int index, float delay = 0f)
+    {
+        var audio = sfxLibrary.GetAudioById(id);
+        if (audio == null) return;
+
+        if (delay <= 0f)
+        {
+            audio.PlayAtIndex(index);
+            return;
+        }
+
+        StartCoroutine(PlaySfxWithDelayC(audio, delay, index));
+    }
+
+    private IEnumerator PlaySfxWithDelayC(Audio audio, float delay, int clipIndex = -1)
     {
         yield return new WaitForSeconds(delay);
-        audio?.Play();
+        if (clipIndex >= 0)
+        {
+            audio?.PlayAtIndex(clipIndex);
+        }
+        else
+        {
+            audio?.Play();
+        }
     }
 
     public void StopSfx(string id) { sfxLibrary.GetAudioById(id)?.Stop(); }

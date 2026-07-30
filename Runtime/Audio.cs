@@ -93,6 +93,23 @@ public class Audio
         currentClipIndex = (currentClipIndex + 1) % clips.Count;
     }
 
+    public void PlayAtIndex(int index)
+    {
+        if (index < 0 || index >= clips.Count)
+        {
+            Debug.LogWarning($"Audio '{id}': Index {index} is out of range. Clips count: {clips.Count}");
+            return;
+        }
+
+        if (clips[index] == null)
+        {
+            Debug.LogWarning($"Audio '{id}': Clip at index {index} is null.");
+            return;
+        }
+
+        PlayClipOnSource(clips[index]);
+    }
+
     private void PlayAll()
     {
         if (clips[0] != null)
