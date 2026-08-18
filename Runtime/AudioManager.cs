@@ -179,6 +179,11 @@ public class AudioManager : MonoBehaviour
         StartCoroutine(PlaySfxWithDelayC(audio, delay, -1));
     }
 
+    public void PlaySfxForDuration(string id, float duration)
+    {
+        sfxLibrary.GetAudioById(id)?.PlayForDuration(this, duration);
+    }
+
     public void PlaySfxAtIndex(string id, int index, float delay = 0f)
     {
         var audio = sfxLibrary.GetAudioById(id);
@@ -228,6 +233,10 @@ public class AudioManager : MonoBehaviour
     #region Music
 
     public void PlayMusic(string id) { musicLibrary.GetAudioById(id)?.Play(); }
+    public void PlayMusicForDuration(string id, float duration)
+    {
+        musicLibrary.GetAudioById(id)?.PlayForDuration(this, duration);
+    }
     public void StopMusic(string id) { musicLibrary.GetAudioById(id)?.Stop(); }
     public void MuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, minVolume); }
     public void UnmuteMusicGlobal() { musicMixerGroup.audioMixer.SetFloat(musicVolExposed, PlayerPrefs.GetFloat(musicVolExposed, 0)); }

@@ -41,6 +41,7 @@ public class Audio
     private Coroutine activeFadeCoroutine;
 
     private AudioSource activeAudioSource;
+    private AudioDurationController durationController;
 
     private AudioSource audioSource
     {
@@ -58,6 +59,7 @@ public class Audio
     public void SetAudioSourceProvider(Func<AudioSource> provider)
     {
         audioSourceProvider = provider;
+        durationController = new AudioDurationController(() => OnStopPlay?.Invoke());
     }
 
     public void Play()
@@ -78,6 +80,27 @@ public class Audio
         {
             PlayRandom();
         }
+    }
+
+    public void PlayForDuration(MonoBehaviour runner, float duration)
+    {
+        if (runner == null)
+        {
+            Debug.LogWarning($"Audio '{id}': PlayForDuration requires a valid MonoBehaviour runner.");
+            return;
+        }
+
+        durationController.BeginCapture();
+        Play();
+        List<AudioSource> startedSources = durationController.EndCapture();
+
+        if (startedSources.Count == 0)
+        {
+            Debug.LogWarning($"Audio '{id}': PlayForDuration did not start any source.");
+            return;
+        }
+
+        durationController.PlayForDuration(runner, duration, startedSources, reuseSource);
     }
 
     private void PlayRandom()
@@ -135,6 +158,7 @@ public class Audio
         aSource.clip = clip;
         SetAudioSettings(aSource);
         aSource.Play();
+        durationController?.Capture(aSource);
         OnStartPlay?.Invoke();
     }
 
@@ -162,6 +186,9 @@ public class Audio
                 additionalSource.Stop();
             }
         }
+
+        // Cancel any pending duration-based stops.
+        durationController?.ClearAll();
     }
 
     public void ResetSequentialIndex() { currentClipIndex = 0; }
