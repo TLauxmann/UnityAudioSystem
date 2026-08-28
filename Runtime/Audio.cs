@@ -193,8 +193,13 @@ public class Audio
 
     public void ResetSequentialIndex() { currentClipIndex = 0; }
     public void SetAudioPos(float pos) { startingPos = pos; }
-    public float GetAudioPos() { return activeAudioSource != null ? activeAudioSource.time : 0f; }
-    public bool IsPlaying() { return activeAudioSource != null && activeAudioSource.isPlaying; }
+    public float GetAudioPos() { return IsPlaybackPositionAvailable() ? activeAudioSource.time : 0f; }
+    public bool IsPlaying() { return activeAudioSource != null && activeAudioSource.isPlaying && activeAudioSource.clip != null; }
+
+    private bool IsPlaybackPositionAvailable()
+    {
+        return activeAudioSource != null && activeAudioSource.clip != null && activeAudioSource.clip.loadState == AudioDataLoadState.Loaded;
+    }
 
     public void FadeIn(MonoBehaviour runner, float time, float toVolume = -1, bool restartAudio = true)
     {
@@ -228,7 +233,7 @@ public class Audio
 
         while (timer < duration)
         {
-            timer += Time.deltaTime;
+            timer += Time.unscaledDeltaTime;
             float t = timer / duration;
 
             if (activeAudioSource == null) yield break;
@@ -248,7 +253,7 @@ public class Audio
 
     public float GetCurrentPlaybackTime()
     {
-        if (activeAudioSource != null && activeAudioSource.isPlaying)
+        if (IsPlaybackPositionAvailable() && activeAudioSource.isPlaying)
         {
             return activeAudioSource.time;
         }

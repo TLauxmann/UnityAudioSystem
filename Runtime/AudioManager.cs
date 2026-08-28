@@ -271,7 +271,7 @@ public class AudioManager : MonoBehaviour
             float delayBeforeFadeOut = timeToWait - fadeDuration;
             if (delayBeforeFadeOut > 0)
             {
-                yield return new WaitForSeconds(delayBeforeFadeOut);
+                yield return new WaitForSecondsRealtime(delayBeforeFadeOut);
             }
 
             currentTrack.FadeOut(this, fadeDuration, 0f, true);
@@ -279,12 +279,12 @@ public class AudioManager : MonoBehaviour
             // wait for fade out
             if (delayBeforeFadeOut > 0)
             {
-                yield return new WaitForSeconds(fadeDuration);
+                yield return new WaitForSecondsRealtime(fadeDuration);
             }
             else
             {
                 // fallback
-                yield return new WaitForSeconds(timeToWait);
+                yield return new WaitForSecondsRealtime(timeToWait);
             }
         }
 
@@ -306,31 +306,31 @@ public class AudioManager : MonoBehaviour
     public void FadeInMusicAudioGroup(float time)
     {
         float toVolume = PlayerPrefs.GetFloat(musicVolExposed, 0);
-        FadeInExposedVolume(time, toVolume, musicVolExposed, musicAudioGroupFadeCoroutine);
+        FadeInExposedVolume(time, toVolume, musicVolExposed, ref musicAudioGroupFadeCoroutine);
     }
     public void FadeOutMusicMusicGroup(float time)
     {
-        FadeOutExposedVolume(time, musicVolExposed, musicAudioGroupFadeCoroutine);
+        FadeOutExposedVolume(time, musicVolExposed, ref musicAudioGroupFadeCoroutine);
     }
 
     public void FadeInSFXAudioGroup(float time)
     {
         float toVolume = PlayerPrefs.GetFloat(sfxVolExposed, 0);
-        FadeInExposedVolume(time, toVolume, sfxVolExposed, sfxAudioGroupFadeCoroutine);
+        FadeInExposedVolume(time, toVolume, sfxVolExposed, ref sfxAudioGroupFadeCoroutine);
     }
 
     public void FadeOutSFXAudioGroup(float time)
     {
-        FadeOutExposedVolume(time, sfxVolExposed, sfxAudioGroupFadeCoroutine);
+        FadeOutExposedVolume(time, sfxVolExposed, ref sfxAudioGroupFadeCoroutine);
     }
 
-    private void FadeInExposedVolume(float time, float toVolume, string exposedParam, Coroutine coroutine)
+    private void FadeInExposedVolume(float time, float toVolume, string exposedParam, ref Coroutine coroutine)
     {
         if (coroutine != null) StopCoroutine(coroutine);
         coroutine = StartCoroutine(FadeInMixerGroup(exposedParam, time, toVolume));
     }
 
-    private void FadeOutExposedVolume(float time, string exposedParam, Coroutine coroutine)
+    private void FadeOutExposedVolume(float time, string exposedParam, ref Coroutine coroutine)
     {
         if (coroutine != null) StopCoroutine(coroutine);
         coroutine = StartCoroutine(FadeOutMixerGroup(exposedParam, time));
@@ -342,7 +342,7 @@ public class AudioManager : MonoBehaviour
         _audioMixer.GetFloat(exposedName, out float currentVol);
         while (elapsedTime < time)
         {
-            elapsedTime += Time.deltaTime;
+            elapsedTime += Time.unscaledDeltaTime;
             _audioMixer.SetFloat(exposedName, Mathf.Lerp(currentVol, minVolume, elapsedTime / time));
             yield return null;
         }
@@ -355,7 +355,7 @@ public class AudioManager : MonoBehaviour
         _audioMixer.GetFloat(exposedName, out float currentVol);
         while (elapsedTime < time)
         {
-            elapsedTime += Time.deltaTime;
+            elapsedTime += Time.unscaledDeltaTime;
             _audioMixer.SetFloat(exposedName, Mathf.Lerp(currentVol, toVolume, elapsedTime / time));
             yield return null;
         }
