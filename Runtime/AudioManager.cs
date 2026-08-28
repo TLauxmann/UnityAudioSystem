@@ -155,10 +155,16 @@ public class AudioManager : MonoBehaviour
         }
         return availableSource;
     }
-    public void SetStartingPoint(string id, float time)
+    public void SetStartingPointMusic(string id, float time)
     {
         var audio = musicLibrary.GetAudioById(id);
-        if (audio == null) { audio = sfxLibrary.GetAudioById(id); }
+        if (audio == null) return;
+        audio.SetAudioPos(time);
+    }
+
+    public void SetStartingPointSFX(string id, float time)
+    {
+        var audio = sfxLibrary.GetAudioById(id);
         if (audio == null) return;
         audio.SetAudioPos(time);
     }
@@ -297,7 +303,8 @@ public class AudioManager : MonoBehaviour
     public void UnsubscribeFromMusicPlayAction(string id, Action action) { musicLibrary.GetAudioById(id).OnStartPlay -= action; }
     public void SubscribeToMusicStopAction(string id, Action action) { musicLibrary.GetAudioById(id).OnStopPlay += action; }
     public void UnsubscribeFromMusicStopAction(string id, Action action) { musicLibrary.GetAudioById(id).OnStopPlay -= action; }
-    public float GetCurrentPos(string id) { return musicLibrary.GetAudioById(id)?.GetAudioPos() ?? 0f; }
+    public float GetCurrentPosMusic(string id) { return musicLibrary.GetAudioById(id)?.GetAudioPos() ?? 0f; }
+    public float GetCurrentPosSFX(string id) { return sfxLibrary.GetAudioById(id)?.GetAudioPos() ?? 0f; }
 
 
     #endregion
