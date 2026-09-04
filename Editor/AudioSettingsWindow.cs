@@ -225,6 +225,42 @@ public class AudioSettingsWindow : EditorWindow
 
         EditorGUILayout.Space();
 
+        // Drag & Drop area for AudioClips
+        Rect dropArea = GUILayoutUtility.GetRect(0, 60, GUILayout.ExpandWidth(true));
+        GUI.Box(dropArea, "Drag & Drop AudioClips Here", EditorStyles.helpBox);
+
+        Event currentEvent = Event.current;
+        switch (currentEvent.type)
+        {
+            case EventType.DragUpdated:
+            case EventType.DragPerform:
+                if (!dropArea.Contains(currentEvent.mousePosition))
+                    break;
+
+                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+                if (currentEvent.type == EventType.DragPerform)
+                {
+                    DragAndDrop.AcceptDrag();
+
+                    foreach (Object draggedObject in DragAndDrop.objectReferences)
+                    {
+                        AudioClip clip = draggedObject as AudioClip;
+                        if (clip != null)
+                        {
+                            selectedAudio.clips.Add(clip);
+                        }
+                    }
+
+                    EditorUtility.SetDirty(targetLibrary);
+                    GUI.changed = true;
+                }
+                Event.current.Use();
+                break;
+        }
+
+        EditorGUILayout.Space();
+
         // Playback Mode
         EditorGUILayout.LabelField("Playback Mode", EditorStyles.miniBoldLabel);
 
